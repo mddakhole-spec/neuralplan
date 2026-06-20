@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>NeuralPlan - AI Study Planner</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #0f0f1a; color: #fff; padding: 30px; }
+        h1 { text-align: center; color: #7c6af7; margin-bottom: 10px; }
+        p.subtitle { text-align: center; color: #aaa; margin-bottom: 30px; }
+        .form-box { background: #1a1a2e; padding: 30px; border-radius: 12px; max-width: 600px; margin: auto; }
+        input { width: 100%; padding: 10px; margin: 8px 0 16px; border-radius: 8px; border: 1px solid #7c6af7; background: #0f0f1a; color: #fff; }
+        button { width: 100%; padding: 12px; background: #7c6af7; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #6a58e0; }
+        .plan-box { background: #1a1a2e; padding: 20px; border-radius: 12px; max-width: 600px; margin: 20px auto; border-left: 4px solid #7c6af7; }
+        .plan-box h3 { color: #7c6af7; margin-bottom: 10px; }
+        label { color: #aaa; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<h1>🧠 NeuralPlan</h1>
+<p class="subtitle">AI-Powered Personalized Study Planner</p>
+
+<!-- Form -->
+<div class="form-box">
+    <form th:action="@{/generate}" th:object="${studyPlan}" method="post">
+        <label>Your Name</label>
+        <input type="text" th:field="*{studentName}" placeholder="e.g. Mugdha" required/>
+
+        <label>Subjects (comma separated)</label>
+        <input type="text" th:field="*{subjects}" placeholder="e.g. Maths, Physics, Chemistry" required/>
+
+        <label>Exam Date</label>
+        <input type="date" th:field="*{examDate}" required/>
+
+        <label>Weak Topics</label>
+        <input type="text" th:field="*{weakTopics}" placeholder="e.g. Integration, Optics" required/>
+
+        <button type="submit">⚡ Generate My Study Plan</button>
+    </form>
+</div>
+
+<!-- Generated Plans -->
+<div th:each="plan : ${allPlans}" class="plan-box">
+    <h3>📋 Plan for <span th:text="${plan.studentName}"></span></h3>
+    <p><b>Subjects:</b> <span th:text="${plan.subjects}"></span></p>
+    <p><b>Exam Date:</b> <span th:text="${plan.examDate}"></span></p>
+    <p><b>Weak Topics:</b> <span th:text="${plan.weakTopics}"></span></p>
+    <p><b>📅 Generated Plan:</b></p>
+    <p th:text="${plan.generatedPlan}"></p>
+</div>
+
+</body>
+</html>
