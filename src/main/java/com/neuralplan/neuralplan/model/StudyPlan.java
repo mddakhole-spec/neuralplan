@@ -16,7 +16,7 @@ public class StudyPlan {
     private String examDate;
     private String weakTopics;
 
-    @Column(length = 5000)
+    @Column(columnDefinition = "TEXT")
     private String generatedPlan;
     private LocalDateTime createdAt;
 
