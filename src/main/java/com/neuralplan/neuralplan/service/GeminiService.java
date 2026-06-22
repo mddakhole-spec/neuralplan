@@ -46,30 +46,43 @@ public class GeminiService {
                 }
                 """, prompt.replace("\"", "'").replace("\n", "\\n"));
 
-        String response = webClient.post()
-                .uri(apiUrl + "?key=" + apiKey)
-                .header("Content-Type", "application/json")
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+        try {
+            String response = webClient.post()
+                    .uri(apiUrl + "?key=" + apiKey)
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
 
-        return extractTextFromResponse(response);
+            return extractTextFromResponse(response);
+
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("429")) {
+                return "⚠️ Too many requests! Gemini API rate limit hit. Please wait a minute and try again.";
+            } else if (e.getMessage() != null && e.getMessage().contains("503")) {
+                return "⚠️ Gemini API is temporarily unavailable. Please try again shortly.";
+            } else {
+                return "⚠️ Could not generate plan right now. Please try again! Error: " + e.getMessage();
+            }
+        }
     }
 
     private String extractTextFromResponse(String response) {
         try {
-            int textIndex = response.indexOf("\"text\":");
-            if (textIndex != -1) {
-                int start = response.indexOf("\"", textIndex + 7) + 1;
-                int end = response.lastIndexOf("\"");
-                return response.substring(start, end)
-                        .replace("\\n", "\n")
-                        .replace("\\'", "'");
-            }
+            com.fasterxml.jackson.databind.ObjectMapper mapper =
+                    new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(response);
+            return root
+                    .path("candidates")
+                    .get(0)
+                    .path("content")
+                    .path("parts")
+                    .get(0)
+                    .path("text")
+                    .asText();
         } catch (Exception e) {
-            return "Could not generate plan. Please try again!";
+            return "⚠️ Could not read AI response. Please try again!";
         }
-        return "No response from AI. Please try again!";
     }
 }

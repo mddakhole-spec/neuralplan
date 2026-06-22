@@ -2,54 +2,171 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NeuralPlan - AI Study Planner</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #0f0f1a; color: #fff; padding: 30px; }
-        h1 { text-align: center; color: #7c6af7; margin-bottom: 10px; }
-        p.subtitle { text-align: center; color: #aaa; margin-bottom: 30px; }
-        .form-box { background: #1a1a2e; padding: 30px; border-radius: 12px; max-width: 600px; margin: auto; }
-        input { width: 100%; padding: 10px; margin: 8px 0 16px; border-radius: 8px; border: 1px solid #7c6af7; background: #0f0f1a; color: #fff; }
-        button { width: 100%; padding: 12px; background: #7c6af7; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
-        button:hover { background: #6a58e0; }
-        .plan-box { background: #1a1a2e; padding: 20px; border-radius: 12px; max-width: 600px; margin: 20px auto; border-left: 4px solid #7c6af7; }
-        .plan-box h3 { color: #7c6af7; margin-bottom: 10px; }
-        label { color: #aaa; font-size: 14px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #ededed; min-height: 100vh; }
+
+        .top-bar { border-bottom: 1px solid #1a1a1a; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 52px; position: sticky; top: 0; background: #0a0a0a; z-index: 10; }
+        .logo { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #fff; text-decoration: none; }
+        .logo-dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; }
+        .nav-pill { background: #111; border: 1px solid #222; border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #888; }
+
+        .hero { padding: 5rem 2rem 3rem; max-width: 680px; margin: 0 auto; }
+        .hero-eyebrow { font-size: 11px; color: #555; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+        .hero-eyebrow::before { content: ''; width: 16px; height: 1px; background: #333; }
+        .hero h1 { font-size: 2.6rem; font-weight: 600; line-height: 1.15; color: #fff; margin-bottom: 1rem; letter-spacing: -.03em; }
+        .hero h1 span { color: #555; }
+        .hero p { font-size: 15px; color: #666; line-height: 1.7; max-width: 480px; }
+
+        .container { max-width: 680px; margin: 0 auto; padding: 0 2rem 4rem; }
+        .divider { border: none; border-top: 1px solid #1a1a1a; margin: 2rem 0; }
+        .label { font-size: 11px; color: #444; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 1rem; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-group label { font-size: 12px; color: #555; }
+        .form-group input { padding: 9px 12px; border: 1px solid #1a1a1a; border-radius: 8px; background: #111; color: #ededed; font-size: 14px; outline: none; transition: border-color .15s; font-family: inherit; }
+        .form-group input:focus { border-color: #333; }
+        .form-group input::placeholder { color: #333; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.3); }
+
+        .btn { width: 100%; padding: 11px; background: #fff; color: #000; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; font-family: inherit; }
+        .btn:hover { background: #e5e5e5; }
+        .btn:disabled { background: #222; color: #555; cursor: not-allowed; }
+
+        .loading-bar { display: none; text-align: center; padding: 1rem; color: #555; font-size: 13px; }
+        .spinner { display: inline-block; width: 14px; height: 14px; border: 1.5px solid #333; border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; margin-right: 6px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .plan-card { border: 1px solid #1a1a1a; border-radius: 10px; overflow: hidden; margin-bottom: .75rem; animation: fadeIn .3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .plan-card-header { padding: .875rem 1rem; border-bottom: 1px solid #111; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+        .plan-card-left { display: flex; align-items: center; gap: 10px; }
+        .initials { width: 32px; height: 32px; border-radius: 6px; background: #161616; border: 1px solid #222; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #888; flex-shrink: 0; }
+        .plan-title { font-size: 13px; font-weight: 600; color: #ededed; }
+        .plan-sub { font-size: 11px; color: #444; margin-top: 1px; }
+        .tags { display: flex; gap: 5px; flex-wrap: wrap; }
+        .tag { background: #111; border: 1px solid #1e1e1e; border-radius: 4px; padding: 2px 8px; font-size: 11px; color: #555; }
+
+        .plan-body { padding: 1rem; }
+        .plan-content { font-size: 13.5px; line-height: 1.8; color: #999; }
+        .plan-content h1, .plan-content h2 { font-size: 14px; font-weight: 600; color: #ededed; margin: 1.25rem 0 .5rem; letter-spacing: -.01em; }
+        .plan-content h2:first-child, .plan-content h1:first-child { margin-top: 0; }
+        .plan-content h3 { font-size: 13px; font-weight: 600; color: #ccc; margin: .875rem 0 .35rem; }
+        .plan-content ul, .plan-content ol { padding-left: 1.1rem; margin: .4rem 0; }
+        .plan-content li { margin: .2rem 0; color: #888; }
+        .plan-content strong { color: #ddd; font-weight: 600; }
+        .plan-content em { color: #666; font-style: italic; }
+        .plan-content code { background: #161616; padding: 1px 5px; border-radius: 4px; font-size: 12px; color: #aaa; font-family: 'SF Mono', 'Fira Code', monospace; border: 1px solid #222; }
+        .plan-content table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: .75rem 0; }
+        .plan-content th { background: #111; padding: 7px 10px; text-align: left; font-weight: 600; color: #ccc; border: 1px solid #1a1a1a; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+        .plan-content td { padding: 7px 10px; border: 1px solid #161616; color: #777; }
+        .plan-content td:first-child { color: #aaa; }
+        .plan-content hr { border: none; border-top: 1px solid #1a1a1a; margin: .875rem 0; }
+        .plan-content blockquote { border-left: 2px solid #333; padding-left: .875rem; color: #555; margin: .75rem 0; font-style: italic; }
+
+        .empty { text-align: center; padding: 2.5rem 1rem; color: #333; font-size: 13px; }
+
+        @media (max-width: 500px) {
+            .hero h1 { font-size: 1.9rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full { grid-column: 1; }
+        }
     </style>
 </head>
 <body>
 
-<h1>🧠 NeuralPlan</h1>
-<p class="subtitle">AI-Powered Personalized Study Planner</p>
+<div class="top-bar">
+    <div class="logo">
+        <div class="logo-dot"></div>
+        NeuralPlan
+    </div>
+    <div class="nav-pill">AI Study Planner</div>
+</div>
 
-<!-- Form -->
-<div class="form-box">
-    <form th:action="@{/generate}" th:object="${studyPlan}" method="post">
-        <label>Your Name</label>
-        <input type="text" th:field="*{studentName}" placeholder="e.g. Mugdha" required/>
+<div class="hero">
+    <div class="hero-eyebrow">Gemini AI powered</div>
+    <h1>Study smarter,<br><span>not harder.</span></h1>
+    <p>Enter your subjects, exam date, and weak topics — NeuralPlan builds you a day-by-day study schedule powered by Gemini AI.</p>
+</div>
 
-        <label>Subjects (comma separated)</label>
-        <input type="text" th:field="*{subjects}" placeholder="e.g. Maths, Physics, Chemistry" required/>
+<div class="container">
+    <hr class="divider" style="margin-top: 0;">
 
-        <label>Exam Date</label>
-        <input type="date" th:field="*{examDate}" required/>
+    <p class="label">Generate your plan</p>
 
-        <label>Weak Topics</label>
-        <input type="text" th:field="*{weakTopics}" placeholder="e.g. Integration, Optics" required/>
-
-        <button type="submit">⚡ Generate My Study Plan</button>
+    <form th:action="@{/generate}" th:object="${studyPlan}" method="post" onsubmit="showLoading()">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" th:field="*{studentName}" placeholder="e.g. Mugdha" required />
+            </div>
+            <div class="form-group">
+                <label>Exam date</label>
+                <input type="date" th:field="*{examDate}" required />
+            </div>
+            <div class="form-group full">
+                <label>Subjects</label>
+                <input type="text" th:field="*{subjects}" placeholder="e.g. Java, Cloud Computing, Maths" required />
+            </div>
+            <div class="form-group full">
+                <label>Weak topics</label>
+                <input type="text" th:field="*{weakTopics}" placeholder="e.g. Threads, Integration, Optics" required />
+            </div>
+        </div>
+        <button type="submit" class="btn" id="generateBtn">
+            Generate study plan
+        </button>
     </form>
+
+    <div class="loading-bar" id="loadingBar">
+        <span class="spinner"></span> Gemini is building your personalized plan...
+    </div>
+
+    <hr class="divider">
+
+    <p class="label">Your plans</p>
+
+    <div th:if="${#lists.isEmpty(allPlans)}" class="empty">
+        No plans yet — generate your first one above.
+    </div>
+
+    <div th:each="plan : ${allPlans}" class="plan-card">
+        <div class="plan-card-header">
+            <div class="plan-card-left">
+                <div class="initials" th:text="${#strings.substring(plan.studentName, 0, 2).toUpperCase()}">MG</div>
+                <div>
+                    <div class="plan-title" th:text="'Plan for ' + ${plan.studentName}">Plan for Mugdha</div>
+                    <div class="plan-sub" th:text="${plan.subjects} + ' · Exam ' + ${plan.examDate}">Java · Exam Jul 13</div>
+                </div>
+            </div>
+            <div class="tags">
+                <span class="tag" th:text="${plan.subjects}">Java</span>
+                <span class="tag" th:text="'⚠ ' + ${plan.weakTopics}">Threads</span>
+            </div>
+        </div>
+        <div class="plan-body">
+            <div th:attr="data-content=${plan.generatedPlan}" class="plan-content"></div>
+        </div>
+    </div>
 </div>
 
-<!-- Generated Plans -->
-<div th:each="plan : ${allPlans}" class="plan-box">
-    <h3>📋 Plan for <span th:text="${plan.studentName}"></span></h3>
-    <p><b>Subjects:</b> <span th:text="${plan.subjects}"></span></p>
-    <p><b>Exam Date:</b> <span th:text="${plan.examDate}"></span></p>
-    <p><b>Weak Topics:</b> <span th:text="${plan.weakTopics}"></span></p>
-    <p><b>📅 Generated Plan:</b></p>
-    <p th:text="${plan.generatedPlan}"></p>
-</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script>
+    document.querySelectorAll('.plan-content').forEach(function(el) {
+        el.innerHTML = marked.parse(el.getAttribute('data-content') || '');
+    });
 
+    function showLoading() {
+        const btn = document.getElementById('generateBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Generating...';
+        document.getElementById('loadingBar').style.display = 'block';
+    }
+</script>
 </body>
 </html>
