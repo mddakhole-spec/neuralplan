@@ -103,7 +103,7 @@
         <div class="form-grid">
             <div class="form-group">
                 <label>Name</label>
-                <input type="text" th:field="*{studentName}" placeholder="e.g. Mugdha" required />
+                <input type="text" th:field="*{studentName}" placeholder="e.g. Riya" required />
             </div>
             <div class="form-group">
                 <label>Exam date</label>
@@ -140,7 +140,7 @@
             <div class="plan-card-left">
                 <div class="initials" th:text="${#strings.substring(plan.studentName, 0, 2).toUpperCase()}">MG</div>
                 <div>
-                    <div class="plan-title" th:text="'Plan for ' + ${plan.studentName}">Plan for Mugdha</div>
+                    <div class="plan-title" th:text="'Plan for ' + ${plan.studentName}">Plan for Riya</div>
                     <div class="plan-sub" th:text="${plan.subjects} + ' · Exam ' + ${plan.examDate}">Java · Exam Jul 13</div>
                 </div>
             </div>
