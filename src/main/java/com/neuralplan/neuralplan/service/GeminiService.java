@@ -21,20 +21,23 @@ public class GeminiService {
 
     public String generateStudyPlan(String studentName, String subjects, String examDate, String weakTopics) {
 
+        String today = java.time.LocalDate.now().toString();
+
         String prompt = String.format("""
-                Create a detailed day-by-day study plan for a student with the following details:
-                - Name: %s
-                - Subjects: %s
-                - Exam Date: %s
-                - Weak Topics: %s
-                
-                Please provide:
-                1. A day-by-day schedule from today until the exam
-                2. Extra focus on weak topics
-                3. Daily study hours recommendation
-                4. Quick revision tips
-                Keep it practical and motivating!
-                """, studentName, subjects, examDate, weakTopics);
+        Create a detailed day-by-day study plan for a student with the following details:
+        - Name: %s
+        - Subjects: %s
+        - Exam Date: %s
+        - Weak Topics: %s
+        - Today's Date: %s
+        
+        Please provide:
+        1. A day-by-day schedule starting from TODAY (%s) until the exam date
+        2. Extra focus on weak topics
+        3. Daily study hours recommendation
+        4. Quick revision tips
+        Keep it practical and motivating!
+        """, studentName, subjects, examDate, weakTopics, today, today);
 
         String requestBody = String.format("""
                 {
