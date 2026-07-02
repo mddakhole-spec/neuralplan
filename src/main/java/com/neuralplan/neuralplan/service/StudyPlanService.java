@@ -28,6 +28,9 @@ public class StudyPlanService {
         studyPlan.setGeneratedPlan(aiPlan);
         return studyPlanRepository.save(studyPlan);
     }
+    public List<StudyPlan> getPlansForUser(com.neuralplan.neuralplan.model.User user){
+        return studyPlanRepository.findByUserOrderByCreatedAtDesc(user);
+    }
     public List<StudyPlan> getAllPlans(){
         return studyPlanRepository.findAll();
     }

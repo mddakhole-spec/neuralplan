@@ -20,6 +20,10 @@ public class StudyPlan {
     private String generatedPlan;
     private LocalDateTime createdAt;
 
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User user;
+
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
